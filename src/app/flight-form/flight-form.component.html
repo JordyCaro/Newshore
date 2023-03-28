@@ -1,0 +1,51 @@
+<div class="form-card">
+
+  <div class="form-group">
+
+    <div class="button-group">
+      <button class="button" [ngClass]="{'selected': selectedOption === 'ida-vuelta'}"
+        (click)="changeOption('ida-vuelta')">Ida y Vuelta</button>
+      <button class="button" [ngClass]="{'selected': selectedOption === 'ida'}" (click)="changeOption('ida')">Solo
+        Ida</button>
+    </div>
+
+  </div>
+
+  <div class="flex">
+    <div class="form-group form-group--inline">
+      <label>De aca:</label>
+      <input type="text" name="origin">
+    </div>
+    <div class="form-group form-group--inline">
+      <label>Hasta aca:</label>
+      <input type="text" name="destination">
+    </div>
+  </div>
+
+  <div class="flex">
+    <div class="form-group form-group--inline dates">
+      <label>Cuando quieres viaja:</label>
+      <input type="date" class="form-control" [(ngModel)]="selectedOption"
+        *ngIf="selectedOption === 'ida' || selectedOption === 'ida-vuelta'">
+    </div>
+    <div class="form-group form-group--inline dates" *ngIf="selectedOption === 'ida-vuelta'">
+      <label>Cuando quieres regresar:</label>
+      <input type="date" class="form-control" [(ngModel)]="selectedOption">
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <select name="currency">
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+      <option value="JPY">JPY</option>
+    </select>
+  </div>
+
+  <div class="search-button-container">
+    <button>Buscar tu vuelo</button>
+  </div>
+
+</div>
