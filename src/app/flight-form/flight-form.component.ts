@@ -15,11 +15,7 @@ export class FlightFormComponent {
   flightSearchForm: FormGroup = this.formBuilder.group({
     tripType: ['round-trip'],
     origin: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
-    // origin: ['', Validators.required],
     destination: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
-    // destination: ['', Validators.required],
-    // departureDate: ['', Validators.required],
-    // returnDate: [''],
     currency: ['USD', Validators.required]
   },{
     validator: this.originDestinationValidator
@@ -27,7 +23,8 @@ export class FlightFormComponent {
   errorMessage: string = '';
 
   flights!: Flight[];
-  ruta!: Flight[];
+  rutaDeIda!: Flight[] | string;
+  rutaDeVuelta!: Flight[] | string;
 
   constructor(private flightService: FlightService, private formBuilder: FormBuilder) {}
 
@@ -35,23 +32,22 @@ export class FlightFormComponent {
     this.flightService.getFlights().subscribe((flights) => {
       console.log('FLIGHTS: ',flights);
       this.flights = flights;
-      this.flights = flights;
-      
-      console.log(this.calcularRutaIdaVuelta('PEI', 'CAN'))
+      // console.log(this.calcularRutaIdaVuelta('PEI', 'CAN'))
     });
     console.log(this.flightSearchForm.value);
 
     this.flightSearchForm.valueChanges.subscribe(() => {
-      console.log(this.flightSearchForm.get('origin'));
+      console.log(this.flightSearchForm);
       if (!this.flightSearchForm.hasError('originDestinationMatch')) {
         this.errorMessage = '';
+        this.flightSearchForm.setErrors(null);
       } else if (this.flightSearchForm.hasError('originDestinationMatch')) {
-        this.errorMessage = 'Origin and destination cannot be the same';
+        this.errorMessage = 'El origen y el destino no pueden ser los mismos';
       }
     });
   
   }
-
+  
   originDestinationValidator(formGroup: FormGroup) {
     const origin = formGroup.get('origin')?.value;
     const destination = formGroup.get('destination')?.value;
@@ -77,18 +73,14 @@ export class FlightFormComponent {
   }
 
   onSubmit() {
-
-  }
-
-  calcularRutaIdaVuelta(origen: string, destino: string, maxVuelos = 10) {
-    console.log(this.calcularRuta(origen, destino,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('8')) ))
-    this.ruta = this.calcularRuta(origen, destino,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('8')) )
-    console.log(this.calcularRuta(destino, origen,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('9')) ))
+    console.log('entro')
+    this.rutaDeIda = this.calcularRuta(this.flightSearchForm.get('origin')?.value, this.flightSearchForm.get('destination')?.value,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('8')) )
+    this.rutaDeVuelta = this.calcularRuta(this.flightSearchForm.get('destination')?.value, this.flightSearchForm.get('origin')?.value,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('9')) )
+    
   }
 
   calcularRuta(origen: string, destino: string, maxVuelos = 10, vuelos: Flight[]) {
-    // Creamos una matriz de vuelos posibles, donde cada fila es un vuelo.
-    const vuelosPosibles: any[] = [];
+    const vuelosPosibles: Flight[][] = [];
   
     // Buscamos todos los vuelos que tengan como origen el lugar indicado por el usuario.
     vuelos.forEach((vuelo) => {
@@ -104,7 +96,7 @@ export class FlightFormComponent {
   
     // Iteramos a través de cada vuelo posible para encontrar la ruta de viaje.
     for (let i = 0; i < maxVuelos - 1; i++) {
-      const nuevasRutas: any[] = [];
+      const nuevasRutas: Flight[][] = [];
   
       // Iteramos a través de cada ruta posible en este punto para encontrar vuelos adicionales.
       for (let j = 0; j < vuelosPosibles.length; j++) {

@@ -1,12 +1,15 @@
-<h2>Ruta de vuelo</h2>
 <div *ngIf="ruta">
-  <div *ngFor="let vuelo of ruta">
-    <div class="vuelo">
-      <div class="vuelo-carrier">{{ vuelo.transport.flightCarrier }}</div>
-      <div class="vuelo-number">{{ vuelo.transport.flightNumber }}</div>
-      <div class="vuelo-origin">{{ vuelo.origin }}</div>
-      <div class="vuelo-destination">{{ vuelo.destination }}</div>
-      <div class="vuelo-price">$ {{ vuelo.price }}</div>
+    <h2 *ngIf="!existeRuta">{{ruta}}</h2>
+    <div *ngIf="existeRuta">
+        <div *ngFor="let vuelo of ruta">
+            <div class="vuelo">
+                <div class="vuelo-carrier">{{ vuelo.transport.flightCarrier }}</div>
+                <div class="vuelo-number">{{ vuelo.transport.flightNumber }}</div>
+                <div class="vuelo-origin">{{ vuelo.origin }}</div>
+                <div class="vuelo-destination">{{ vuelo.destination }}</div>
+                <div *ngIf="currency === 'USD'" class="vuelo-price">$ {{ vuelo.price }}</div>
+                <div *ngIf="currency !== 'USD'" class="vuelo-price">$ {{ vuelo.price | currencyConversion: currency}}</div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>

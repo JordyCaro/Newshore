@@ -88,6 +88,11 @@ button[type="submit"] {
   cursor: pointer;
 }
 
+button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 button[type="submit"]:hover {
   background-color: #2c5282;
 }

@@ -11,6 +11,7 @@ import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
 import { SelectFlightComponent } from './select-flight/select-flight.component';
 import { RutaComponent } from './ruta/ruta.component';
+import { CurrencyConversionPipe } from './pipes/currency-conversion.pipe';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { RutaComponent } from './ruta/ruta.component';
     HomeComponent,
     SelectFlightComponent,
     RutaComponent,
+    CurrencyConversionPipe
   ],
   imports: [
     BrowserModule,
