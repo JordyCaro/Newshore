@@ -1,42 +1,55 @@
 <div class="form-card">
 
+  <div class="form-card" [formGroup]="flightSearchForm" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="button-group">
+        <button class="button" [ngClass]="{'selected': flightSearchForm.get('tripType')?.value === 'round-trip'}"
+          type="button" (click)="flightSearchForm.get('tripType')?.setValue('round-trip')">Ida y Vuelta</button>
+        <button class="button" [ngClass]="{'selected': flightSearchForm.get('tripType')?.value === 'one-way'}"
+          type="button" (click)="flightSearchForm.get('tripType')?.setValue('one-way')">Solo Ida</button>
+      </div>
+  
+    </div>
+  
+    <div class="flex">
+      <div class="form-group form-group--inline">
+        <label>De aca:</label>
+        <input type="text" formControlName="origin" maxlength="3" style="text-transform: uppercase"
+        (keyup)="flightSearchForm.get('origin')?.setValue(flightSearchForm.get('origin')?.value.toUpperCase().trim())">
+        <div *ngIf="flightSearchForm.get('origin')?.touched && !flightSearchForm.get('origin')?.value" class="error">
+          El origen es requerido.
+        </div>
+        <div *ngIf="flightSearchForm.get('origin')?.errors?.['minlength'] || flightSearchForm.get('origin')?.errors?.['maxlength']">
+          El origen debe tener exactamente 3 caracteres.
+        </div>
+      </div>
+      <div class="form-group form-group--inline">
+        <label>Hasta aca:</label>
+        <input type="text" formControlName="destination" maxlength="3" style="text-transform: uppercase"
+        (keyup)="flightSearchForm.get('destination')?.setValue(flightSearchForm.get('destination')?.value.toUpperCase().trim())">
+        <div *ngIf="flightSearchForm.get('destination')?.touched && !flightSearchForm.get('destination')?.value" class="error">
+          El destino es requerido.
+        </div>
+        <div *ngIf="flightSearchForm.get('destination')?.errors?.['minlength'] || flightSearchForm.get('destination')?.errors?.['maxlength']">El destino debe tener exactamente 3 caracteres.</div>
+      </div>
+    </div>
+  
+    <!-- <div class="flex">
+      <div class="form-group form-group--inline dates">
+        <label>Cuando quieres viajar:</label>
+        <input type="date" class="form-control" formControlName="departureDate"
+        *ngIf=" flightSearchForm.get('tripType')?.value === 'one-way' ||  flightSearchForm.get('tripType')?.value === 'round-trip'">
+      </div>
+      <div class="form-group form-group--inline dates" *ngIf=" flightSearchForm.get('tripType')?.value === 'round-trip'">
+        <label>Cuando quieres regresar:</label>
+        <input type="date" class="form-control" formControlName="returnDate">
+      </div>
+    </div> -->
+
   <div class="form-group">
-
-    <div class="button-group">
-      <button class="button" [ngClass]="{'selected': selectedOption === 'ida-vuelta'}"
-        (click)="changeOption('ida-vuelta')">Ida y Vuelta</button>
-      <button class="button" [ngClass]="{'selected': selectedOption === 'ida'}" (click)="changeOption('ida')">Solo
-        Ida</button>
-    </div>
-
-  </div>
-
-  <div class="flex">
-    <div class="form-group form-group--inline">
-      <label>De aca:</label>
-      <input type="text" name="origin">
-    </div>
-    <div class="form-group form-group--inline">
-      <label>Hasta aca:</label>
-      <input type="text" name="destination">
-    </div>
-  </div>
-
-  <div class="flex">
-    <div class="form-group form-group--inline dates">
-      <label>Cuando quieres viaja:</label>
-      <input type="date" class="form-control" [(ngModel)]="selectedOption"
-        *ngIf="selectedOption === 'ida' || selectedOption === 'ida-vuelta'">
-    </div>
-    <div class="form-group form-group--inline dates" *ngIf="selectedOption === 'ida-vuelta'">
-      <label>Cuando quieres regresar:</label>
-      <input type="date" class="form-control" [(ngModel)]="selectedOption">
-    </div>
-
-  </div>
-
-  <div class="form-group">
-    <select name="currency">
+    <select formControlName="currency">
       <option value="USD">USD</option>
       <option value="EUR">EUR</option>
       <option value="GBP">GBP</option>
@@ -45,7 +58,9 @@
   </div>
 
   <div class="search-button-container">
-    <button>Buscar tu vuelo</button>
+    <button type="submit" [disabled]="flightSearchForm.invalid">Buscar tu vuelo</button>
   </div>
+
+  <app-ruta [ruta]="ruta"></app-ruta>
 
 </div>

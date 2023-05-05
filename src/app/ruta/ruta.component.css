@@ -1,0 +1,29 @@
+.vuelo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+  }
+  
+  .vuelo-carrier {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .vuelo-number {
+    margin-left: 10px;
+  }
+  
+  .vuelo-origin, .vuelo-destination {
+    font-size: 16px;
+    color: #000000;
+  }
+  
+  .vuelo-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+  }

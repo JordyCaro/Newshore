@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-// import { FlightService } from '../flight.service';
+import { FlightService } from '../services/flight.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Flight } from '../models/journey.model';
 
 @Component({
   selector: 'app-flight-form',
@@ -10,9 +12,56 @@ export class FlightFormComponent {
   isOneWaySelected = true;
   isRoundTripSelected = false;
   selectedOption = 'ida';
+  flightSearchForm: FormGroup = this.formBuilder.group({
+    tripType: ['round-trip'],
+    origin: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
+    // origin: ['', Validators.required],
+    destination: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
+    // destination: ['', Validators.required],
+    // departureDate: ['', Validators.required],
+    // returnDate: [''],
+    currency: ['USD', Validators.required]
+  },{
+    validator: this.originDestinationValidator
+  });
+  errorMessage: string = '';
 
-  constructor() {}
+  flights!: Flight[];
+  ruta!: Flight[];
 
+  constructor(private flightService: FlightService, private formBuilder: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.flightService.getFlights().subscribe((flights) => {
+      console.log('FLIGHTS: ',flights);
+      this.flights = flights;
+      this.flights = flights;
+      
+      console.log(this.calcularRutaIdaVuelta('PEI', 'CAN'))
+    });
+    console.log(this.flightSearchForm.value);
+
+    this.flightSearchForm.valueChanges.subscribe(() => {
+      console.log(this.flightSearchForm.get('origin'));
+      if (!this.flightSearchForm.hasError('originDestinationMatch')) {
+        this.errorMessage = '';
+      } else if (this.flightSearchForm.hasError('originDestinationMatch')) {
+        this.errorMessage = 'Origin and destination cannot be the same';
+      }
+    });
+  
+  }
+
+  originDestinationValidator(formGroup: FormGroup) {
+    const origin = formGroup.get('origin')?.value;
+    const destination = formGroup.get('destination')?.value;
+    if (!!origin && origin === destination) {
+      return { originDestinationMatch: true };
+    }
+    return { originDestinationMatch: false };
+  }
+
+  
   selectOneWay() {
     this.isOneWaySelected = true;
     this.isRoundTripSelected = false;
@@ -24,6 +73,75 @@ export class FlightFormComponent {
   }
 
   changeOption(option: string) {
-    this.selectedOption = option;
+    this.flightSearchForm.controls['travelType'].setValue(option);
+  }
+
+  onSubmit() {
+
+  }
+
+  calcularRutaIdaVuelta(origen: string, destino: string, maxVuelos = 10) {
+    console.log(this.calcularRuta(origen, destino,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('8')) ))
+    this.ruta = this.calcularRuta(origen, destino,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('8')) )
+    console.log(this.calcularRuta(destino, origen,10, this.flights.filter(vuelo => vuelo.transport.flightNumber.startsWith('9')) ))
+  }
+
+  calcularRuta(origen: string, destino: string, maxVuelos = 10, vuelos: Flight[]) {
+    // Creamos una matriz de vuelos posibles, donde cada fila es un vuelo.
+    const vuelosPosibles: any[] = [];
+  
+    // Buscamos todos los vuelos que tengan como origen el lugar indicado por el usuario.
+    vuelos.forEach((vuelo) => {
+      if (vuelo.origin === origen) {
+        vuelosPosibles.push([vuelo]);
+      }
+    });
+  
+    // Si no hay vuelos posibles, la ruta no se puede calcular.
+    if (vuelosPosibles.length === 0) {
+      return "Lo siento, no hay vuelos disponibles para el origen especificado.";
+    }
+  
+    // Iteramos a través de cada vuelo posible para encontrar la ruta de viaje.
+    for (let i = 0; i < maxVuelos - 1; i++) {
+      const nuevasRutas: any[] = [];
+  
+      // Iteramos a través de cada ruta posible en este punto para encontrar vuelos adicionales.
+      for (let j = 0; j < vuelosPosibles.length; j++) {
+        const ruta = vuelosPosibles[j];
+        const ultimoVuelo = ruta[ruta.length - 1];
+  
+        // Buscamos vuelos adicionales que tengan como origen el destino del último vuelo en la ruta actual.
+        vuelos.forEach((vuelo) => {
+          if (vuelo.origin === ultimoVuelo.destination) {
+            // Si encontramos un vuelo, creamos una nueva ruta que incluya este vuelo.
+            nuevasRutas.push([...ruta, vuelo]);
+          }
+        });
+      }
+  
+      // Si encontramos una ruta que llegue al destino, la devolvemos.
+      for (let k = 0; k < nuevasRutas.length; k++) {
+        const ruta = nuevasRutas[k];
+        const ultimoVuelo = ruta[ruta.length - 1];
+        if (ultimoVuelo.destination === destino) {
+          return ruta;
+        }
+      }
+  
+      // Si no encontramos una ruta que llegue al destino, usamos las nuevas rutas como las posibles rutas para la próxima iteración.
+      vuelosPosibles.splice(0, vuelosPosibles.length);
+      nuevasRutas.forEach((ruta) => {
+        vuelosPosibles.push(ruta);
+      });
+  
+      // Si no hay más vuelos posibles, la ruta no se puede calcular.
+      if (vuelosPosibles.length === 0) {
+        return "Lo siento, no hay vuelos disponibles para llegar a su destino.";
+      }
+    }
+  
+    // Si llegamos aquí, hemos alcanzado el límite máximo de vuelos permitidos sin encontrar una ruta al destino.
+    return "Lo siento, no se pudo encontrar una ruta al destino dentro del límite de vuelos permitidos.";
   }
 }
